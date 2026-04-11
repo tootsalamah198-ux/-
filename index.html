@@ -3,18 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>اعط صوتاً للثلاسيميا الصامتة | Smart Mutation Lab</title>
+<title>Smart Mutation Lab | الميزان الدقيق</title>
 <style>
 html,body{width:100%;height:100%;margin:0;padding:0;overflow-x:hidden;}
-body{font-family:Arial;background:#e5d9f8;direction:rtl;padding:20px;}
+body{font-family:Arial, sans-serif;background:#e5d9f8;direction:rtl;padding:20px;}
 .section{background:white;padding:15px;margin:15px 0;border-radius:8px;box-shadow:0 0 8px rgba(0,0,0,0.1);}
 h1{text-align:center;color:#e74c3c;}
 .subtitle{text-align:center;color:#666;margin-bottom:25px;}
 .codon span{padding:8px 10px;margin:2px;border-radius:6px;display:inline-block;transition:all 0.3s ease, transform 0.3s ease;}
 .codon span:hover{transform:scale(1.3) rotate(5deg);cursor:pointer;box-shadow:0 0 12px rgba(0,0,0,0.3);}
 .black span{color:black;}
-.warning{color:#c0392b;font-weight:bold;}
-.safe{color:#27ae60;font-weight:bold;}
 .table-container{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;margin-top:10px;}
 th,td{border:1px solid #ccc;padding:6px;text-align:center;}
@@ -27,20 +25,19 @@ th{background:#ecf0f1;}
 .dot:nth-child(2){animation-delay:0.2s;}
 .dot:nth-child(3){animation-delay:0.4s;}
 @keyframes blinkDot{0%,20%{opacity:0;}50%,100%{opacity:1;}}
-#results-title, #ai-title {transition: text-shadow 0.3s ease;}
-.glow-brain, .glow-ai {text-shadow: 0 0 8px #f1c40f, 0 0 16px #f1c40f, 0 0 24px #f39c12;}
-.footer-note {margin-top:15px;font-size:12px;color:#555;}
-.button-ai {display:flex;align-items:center;gap:10px;margin-top:10px;cursor:pointer;}
-.button-ai span {font-size:22px;}
-#ai-window{display:none;background:#f0f8ff;padding:10px;margin-top:10px;border-radius:8px;box-shadow:0 0 8px rgba(0,0,0,0.2);overflow-x:auto; line-height:1.6;}
-.ai-text {animation:aiGlow 1.5s infinite;}
-@keyframes aiGlow {0%{color:#3498db;}50%{color:#9b59b6;}100%{color:#3498db;}}
+.button-ai {display:flex;align-items:center;gap:10px;margin-top:10px;cursor:pointer;justify-content:center; background:#e74c3c; color:white; padding:10px; border-radius:8px;}
+#ai-window{display:none;background:#f0f8ff;padding:15px;margin-top:10px;border-radius:8px;box-shadow:0 0 8px rgba(0,0,0,0.2);line-height:1.6;}
+.lab-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fdf2f2; padding: 15px; border-radius: 8px; border: 1px solid #fab1a0; margin-top: 10px; }
+.lab-inputs label { font-size: 13px; font-weight: bold; color: #d63031; }
+.lab-inputs input { width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+.iron-warning { background: #2c3e50; color: #fff; padding: 10px; border-radius: 5px; margin-top: 10px; border: 2px dashed #e74c3c; text-align: center; font-weight: bold; }
+.dna-recommendation { background: #fff; border: 2px solid #8e44ad; color: #8e44ad; padding: 12px; border-radius: 8px; margin-top: 10px; font-weight: bold; text-align: center; }
 </style>
 </head>
 <body>
 
-<h1>اعط صوتاً للثلاسيميا الصامتة<br>Smart Mutation Lab</h1>
-<div class="subtitle">نموذج محاكاة للطفرات على جزيء DNA مأخوذ من جين بيتا ثلاسيميا</div>
+<h1>Smart Mutation Lab</h1>
+<div class="subtitle">نظام الميزان الطبي المتقدم للكشف عن الثلاسيميا الصامتة والحالات السليمة</div>
 
 <div class="section">
 <b>السلسلة الأصلية:</b>
@@ -75,18 +72,32 @@ th{background:#ecf0f1;}
 </div>
 
 <div class="section">
-<b id="results-title" style="color:#e74c3c; font-size:18px;">🧠 النتائج المتوقعة</b>
+<b id="results-title" style="color:#e74c3c; font-size:18px;">🧠 النتائج المتوقعة بناءً على المحاكاة</b>
 <div id="loading" style="display:none;">🔍 جاري تحليل الطفرة <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
 <div id="info"></div>
 <div id="ai"></div>
+</div>
 
+<div class="section">
+    <b style="color:#d63031;">🔬 محلل الفحوصات المخبرية (دقة الطبيب الرقمي الشمولية)</b>
+    <div class="lab-inputs">
+        <div><label>Hb (الهيموجلوبين):</label><input type="number" id="lab-hb" placeholder="g/dL" step="0.1"></div>
+        <div><label>RBC (عدد الكريات):</label><input type="number" id="lab-rbc" placeholder="M/µL" step="0.1"></div>
+        <div><label>MCV:</label><input type="number" id="lab-mcv" placeholder="fL" step="0.1"></div>
+        <div><label>MCH:</label><input type="number" id="lab-mch" placeholder="pg" step="0.1"></div>
+        <div><label>HbA2:</label><input type="number" id="lab-hba2" placeholder="%" step="0.1"></div>
+        <div><label>الحديد (Iron):</label><input type="number" id="lab-iron" placeholder="μg/dL" step="0.1"></div>
+    </div>
+</div>
+
+<div class="section" style="text-align:center;">
 <div class="button-ai" onclick="analyzeAI()">
-<b id="ai-title" class="glow-ai" style="color:#e74c3c; font-size:20px;">🤖 تحليل الذكاء الصناعي</b>
+<b id="ai-title" style="font-size:20px;">🤖 تحليل الذكاء الصناعي الشامل</b>
 </div>
 <div id="ai-window"></div>
 </div>
 
-<div class="footer-note">صُمم في يناير 2026</div>
+<div class="footer-note">صُمم في يناير 2026 - Smart Mutation Lab</div>
 
 <script>
 const dna="TACCACGTGGACTGAGGACTCCTCTTCAGA";
@@ -151,40 +162,108 @@ function showAA(){if(index<aa.length){if(aa[index]!==originalAA[index]) protein.
 showAA();
 aacount.innerHTML="عدد الأحماض الأمينية: "+aa.length;
 info.innerHTML=`<div>نوع الطفرة: ${type.value}</div><div>مواقع الطفرات: ${positions.map(p=>p+1).join(" , ")}</div>`;
-const title=document.getElementById("results-title");
-title.classList.add("glow-brain");
 loading.style.display="block"; ai.innerHTML=""; aiWindow.style.display="none";
-setTimeout(()=>{ loading.style.display="none"; title.classList.remove("glow-brain"); aiAnalysisLocal(type.value,currentDNA,aa,positions); },2000);
+setTimeout(()=>{ loading.style.display="none"; aiAnalysisLocal(type.value,currentDNA,aa,positions); },2000);
 }
 
+// --- تعديل دالة التحليل المحلي لإظهار الجدول الكامل في كل الحالات ---
 function aiAnalysisLocal(t,seq,aa,positions){
-let html="";const normalAA=Math.floor(dna.length/3);const sameProtein=aa.join("-")===originalAA.join("-");
-if(t==="none"||(t==="sub"&&sameProtein)){
-html+=`🟢 بروتين β-globin طبيعي.<br><table><tr><th>الفحص</th><th>طبيعي</th><th>متوقع</th></tr><tr><td>Hb</td><td>12–16</td><td>طبيعي</td></tr><tr><td>MCV</td><td>80–96</td><td>طبيعي</td></tr></table><br><b>الاستنتاج:</b> لا توجد طفرة مؤثرة.`;}else{let severe=false;if(seq.length%3!==0||aa.length<normalAA) severe=true;
-html+=`<b>الاستنتاج:</b> ${severe?"β⁰ Thalassemia":"β⁺ Thalassemia"}<br><div class="table-container"><table><tr><th>الفحص</th><th>طبيعي</th><th>متوقع</th></tr><tr><td>Hb</td><td>12–16</td><td>${severe?"منخفض جدًا":"منخفض بسيط"}</td></tr><tr><td>MCV</td><td>80–96</td><td>منخفض</td></tr></table></div>`;}
-ai.innerHTML=html;
+let html="";
+const normalAA = Math.floor(dna.length/3);
+const sameProtein = aa.join("-") === originalAA.join("-");
+let severe = (seq.length % 3 !== 0 || aa.length < normalAA);
+
+// تحديد القيم بناءً على الحالة
+let hbVal = (t==="none"||sameProtein) ? "12–16" : (severe ? "6–9" : "9–11");
+let mcvVal = (t==="none"||sameProtein) ? "80–96" : (severe ? "55–65" : "65–75");
+let mchVal = (t==="none"||sameProtein) ? "27–33" : (severe ? "16–20" : "20–25");
+let rbcVal = (t==="none"||sameProtein) ? "4.5–5.5" : (severe ? "3.0–4.0" : "5.5–6.5"); // RBC يرتفع في الثلاسيميا الصغرى كتعويض
+let hba2Val = (t==="none"||sameProtein) ? "2.0–3.5" : (severe ? "1.5–2.5" : "3.5–6.0");
+let ironVal = "60–170"; // الحديد يبقى طبيعياً في الحالات الجينية البسيطة
+
+html += `<b>الاستنتاج المتوقع:</b> ${t==="none"||sameProtein ? "حالة سليمة (بروتين طبيعي)" : (severe ? "β⁰ Thalassemia (Major)" : "β⁺ Thalassemia (Minor/Inter)")}<br>
+<div class="table-container">
+<table>
+<tr><th>الفحص</th><th>القيم الطبيعية</th><th>النتائج المتوقعة</th></tr>
+<tr><td>Hb</td><td>12–16 g/dL</td><td>${hbVal} g/dL</td></tr>
+<tr><td>RBC</td><td>4.5–5.5 M/µL</td><td>${rbcVal} M/µL</td></tr>
+<tr><td>MCV</td><td>80–96 fL</td><td>${mcvVal} fL</td></tr>
+<tr><td>MCH</td><td>27–33 pg</td><td>${mchVal} pg</td></tr>
+<tr><td>HbA2</td><td>2.0–3.5 %</td><td>${hba2Val} %</td></tr>
+<tr><td>الحديد</td><td>60–170 μg/dL</td><td>${ironVal} μg/dL</td></tr>
+</table>
+</div>`;
+
+ai.innerHTML = html;
 }
 
-// الوظيفة المحدثة لتعمل عالمياً عبر المحاكاة السحابية
+// --- قسم تحليل الذكاء الصناعي المطور بالاحتمالية الديناميكية ---
 async function analyzeAI(){
     aiWindow.style.display="block";
-    aiWindow.innerHTML="<b class='ai-text'>🔹 جاري تحليل الطفرة عبر Gemini السحابي...</b>";
+    aiWindow.innerHTML="🔹 جاري تدقيق كافة المؤشرات والموازين الأربعة...";
     
-    // المحاكي السحابي يضمن أن النتيجة تظهر فوراً على أي جهاز دون مشاكل اتصال
     setTimeout(() => {
-        let currentMut = document.getElementById("mutated").innerText;
-        let currentType = document.getElementById("type").value;
-        let currentProt = document.getElementById("protein").innerText;
-        
-        aiWindow.innerHTML = `
-        <div style='color:#2c3e50; border-right: 4px solid #6c5ce7; padding-right:10px;'>
-            <b>🔬 التحليل الذكي المستلم:</b><br><br>
-            بناءً على السلسلة الطافرة (${currentMut}) ونوعها (${currentType})، يشير التحليل إلى وجود خلل وظيفي في ترجمة الهيموجلوبين. 
-            تؤدي هذه الطفرة إلى إنتاج بروتين (${currentProt}) غير مستقر، مما يعزز تشخيص الإصابة بالثلاسيميا الصامتة أو المتوسطة. 
-            ينصح بضرورة إجراء تحليل الدم الشامل وتوثيق النتائج مع التاريخ العائلي.<br><br>
-            <small style="color:#7f8c8d;">* تم التحليل عبر نظام الوكيل العالمي المستقر لعام 2026.</small>
-        </div>`;
-    }, 2000);
+        let hb = parseFloat(document.getElementById("lab-hb").value);
+        let rbc = parseFloat(document.getElementById("lab-rbc").value);
+        let mcv = parseFloat(document.getElementById("lab-mcv").value);
+        let mch = parseFloat(document.getElementById("lab-mch").value);
+        let hba2 = parseFloat(document.getElementById("lab-hba2").value);
+        let iron = parseFloat(document.getElementById("lab-iron").value);
+
+        if(isNaN(hb) || isNaN(mcv) || isNaN(mch) || isNaN(iron) || isNaN(hba2) || isNaN(rbc)){
+             aiWindow.innerHTML = "⚠️ خطأ: يرجى إدخال جميع القيم بما فيها RBC للتحليل الرباعي.";
+             return;
+        }
+
+        if(hb <= 2 || hb > 25 || mcv <= 30 || mcv > 150 || iron <= 5 || iron > 500 || rbc < 1 || rbc > 10) {
+            aiWindow.innerHTML = `<div style="border:2px solid #e74c3c; padding:10px; background:#fff5f5; border-radius:8px; color:#e74c3c;">⚠️ <b>تنبيه أمني:</b> لقد أدخلت قيماً غير منطقية.</div>`;
+            return;
+        }
+
+        let mentzer = (mcv / rbc).toFixed(1);
+        let shine = ((Math.pow(mcv, 2) * mch) / 100).toFixed(0);
+        let srivastava = (mch / rbc).toFixed(1);
+        let england = (mcv - hb - (5 * rbc) - 3.4).toFixed(1);
+
+        let report = `<b>🔬 التقرير السريري المرجعي (التحليل الرباعي):</b><hr>`;
+        report += `<small>منزر: ${mentzer} | شاين: ${shine} | سريفستافا: ${srivastava} | إنجلاند: ${england}</small><br><br>`;
+
+        let thalScore = 0;
+        if(mentzer < 13) thalScore++;
+        if(shine < 1530) thalScore++;
+        if(srivastava < 3.8) thalScore++;
+        if(england < 0) thalScore++;
+
+        let dynamicProb = 0;
+        if(thalScore === 1) dynamicProb = 40;
+        else if(thalScore === 2) dynamicProb = 65;
+        else if(thalScore === 3) dynamicProb = 85;
+        else if(thalScore === 4) dynamicProb = 96;
+
+        if (hb >= 12.5 && mcv >= 80 && iron >= 65 && hba2 <= 3.5) {
+            report += `<span style="color:#27ae60;">✅ <b>التشخيص: حالة سليمة</b></span><br>المؤشرات الجينية والمواد الخام طبيعية تماماً.`;
+        }
+        else if (iron < 55 && thalScore <= 1) {
+            report += `<span style="color:#c0392b;">📍 <b>التشخيص: أنيميا نقص الحديد</b></span><br>نقص الحديد هو السبب الجذري.`;
+        }
+        else if (iron >= 60 && thalScore >= 2 && hba2 <= 3.5) {
+            report += `<span style="color:#e67e22;">⚠️ <b>التشخيص: ثلاسيميا صامتة (Silent Thalassemia)</b></span><br>`;
+            report += `<div class="dna-recommendation">بناءً على المؤشرات، هناك احتمال ${dynamicProb}% أن تكون الحالة جينية، وننصح بفحص DNA.</div>`;
+            report += `<div class="iron-warning">🚫 تحذير: يُمنع تناول مكملات الحديد!</div>`;
+        }
+        else if (hba2 > 3.5 && iron >= 50) {
+            report += `<span style="color:#8e44ad;">📍 <b>التشخيص: ثلاسيميا بيتا الصغرى</b></span>`;
+            report += `<div class="iron-warning">🚫 تحذير: الخلل جيني، الحديد لا يعالج الحالة.</div>`;
+        }
+        else if (hb < 8 && thalScore >= 3) {
+            report += `<span style="color:#e74c3c;">🚨 <b>التشخيص: اشتباه ثلاسيميا كبرى</b></span>`;
+        }
+        else {
+            report += `🔍 <b>التحليل:</b> نتائج مختلطة تتطلب فحص Ferritin.`;
+        }
+
+        aiWindow.innerHTML = report;
+    }, 1500);
 }
 </script>
 </body>
