@@ -420,11 +420,8 @@ async function analyzeAI(){
 
     // قائمة المسارات والنماذج للتجربة التلقائية
     const configs = [
-        { version: "v1", model: "gemini-1.5-flash-latest" },
-        { version: "v1beta", model: "gemini-1.5-flash-latest" },
-        { version: "v1", model: "gemini-1.5-flash" },
         { version: "v1beta", model: "gemini-1.5-flash" },
-        { version: "v1", model: "gemini-pro" }
+        { version: "v1", model: "gemini-1.5-flash" }
     ];
 
     let success = false;
@@ -436,36 +433,40 @@ async function analyzeAI(){
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: promptText }]
+                    }]
+                })
             });
 
             if (response.ok) {
                 const data = await response.json();
-                const text = data.candidates[0].content.parts[0].text;
-                
-                aiWin.innerHTML = "";
-                let charIndex = 0;
-                function typeEffect() {
-                    if (charIndex < text.length) {
-                        let char = text.charAt(charIndex);
-                        aiWin.innerHTML += char === '\n' ? '<br>' : char;
-                        charIndex++;
-                        aiWin.scrollTop = aiWin.scrollHeight;
-                        setTimeout(typeEffect, 15);
+                if (data.candidates && data.candidates[0].content) {
+                    const text = data.candidates[0].content.parts[0].text;
+                    
+                    aiWin.innerHTML = "";
+                    let charIndex = 0;
+                    function typeEffect() {
+                        if (charIndex < text.length) {
+                            let char = text.charAt(charIndex);
+                            aiWin.innerHTML += char === '\n' ? '<br>' : char;
+                            charIndex++;
+                            aiWin.scrollTop = aiWin.scrollHeight;
+                            setTimeout(typeEffect, 15);
+                        }
                     }
+                    typeEffect();
+                    success = true;
                 }
-                typeEffect();
-                success = true;
-            } else {
-                console.warn(`Attempt failed with ${config.version}/${config.model}`);
             }
         } catch (e) {
-            console.error(`Error with ${config.version}/${config.model}:`, e);
+            console.error(`Error with ${config.version}:`, e);
         }
     }
 
     if (!success) {
-        aiWin.innerHTML = `<div class='validation-error'>❌ فشل الاتصال بكافة النماذج والمسارات المتاحة. قد يكون السبب قيود المتصفح (CORS). يرجى رفع الملف على GitHub Pages أو Netlify ليعمل بشكل صحيح.</div>`;
+        aiWin.innerHTML = `<div class='validation-error'>❌ فشل الاتصال بالذكاء الصناعي. يرجى التأكد من رفع الكود على Netlify وتحديث الصفحة.</div>`;
     }
 }
 </script>
