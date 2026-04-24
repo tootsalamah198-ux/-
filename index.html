@@ -189,6 +189,17 @@ th{background:#ecf0f1;}
 .index-tag { padding: 2px 5px; border-radius: 4px; font-weight: bold; }
 .tag-thal { background: #ffebee; color: #c62828; }
 .tag-ida { background: #e3f2fd; color: #1565c0; }
+
+/* ستايل مخصص لرسالة التوافق الجديدة */
+.biocompatibility-box {
+    background: #f4faff;
+    border-right: 4px solid #3498db;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #2980b9;
+    font-style: italic;
+}
 </style>
 </head>
 <body>
@@ -371,7 +382,7 @@ function aiAnalysisLocal(t,seq,aa,positions){
     ai.innerHTML = html;
 }
 
-// --- الدالة المحدثة: نظام الميزان الطبي مع صمامات الأمان والبروتوكول الوطني ---
+// --- الدالة المحدثة: نظام الميزان الطبي مع صمامات الأمان والبروتوكول الهرمي الصارم ---
 async function analyzeAI(){
     aiWindow.style.display="block";
     aiWindow.innerHTML="🔹 جاري تطبيق بروتوكول التشخيص الهرمي وتحليل مصفوفة الموازين...";
@@ -390,26 +401,34 @@ async function analyzeAI(){
              return;
         }
 
-        // 1. أولاً: التحقق من دقة حساب MCH رياضياً (أولوية قصوى)
-        let calculatedMCH = (hb * 10) / rbc;
-        if (Math.abs(mch - calculatedMCH) > 0.5) { 
-            aiWindow.innerHTML = `<div class="validation-error" style="background:#e67e22;">⚠️ خطأ في مطابقة البيانات!<br>بناءً على Hb و RBC، يجب أن تكون قيمة MCH تقريباً: ${calculatedMCH.toFixed(1)} pg. يرجى مراجعة الإدخال.</div>`;
+        // ==========================================
+        // صمامات أمان الحدود المنطقية (المستوى الأول)
+        // ==========================================
+        if (hb < 2 || hb > 22) {
+            aiWindow.innerHTML = `<div class="validation-error">⚠️ القيمة المدخلة للهيموجلوبين (${hb}) غير منطقية طبياً.</div>`;
+            return;
+        }
+        if (rbc < 1 || rbc > 10) {
+            aiWindow.innerHTML = `<div class="validation-error">⚠️ القيمة المدخلة لعدد الكريات (${rbc}) خارج المدى المنطقي.</div>`;
+            return;
+        }
+        if (mcv < 30 || mcv > 150) {
+            aiWindow.innerHTML = `<div class="validation-error">⚠️ قيمة MCV (${mcv}) غير ممكنة حيوياً.</div>`;
+            return;
+        }
+        if (iron < 5 || iron > 500) {
+            aiWindow.innerHTML = `<div class="validation-error">⚠️ قيمة الحديد (${iron}) خارج المدى المخبري المنطقي.</div>`;
             return;
         }
 
-        // 2. ثانياً: فحص التضارب الحيوي (منطق الحديد والمخزون)
-        if (!isNaN(ferritin)) {
-            if (ferritin > 3000) {
-                aiWindow.innerHTML = `<div class="validation-error" style="background:#c0392b;">⚠️ خطأ في البيانات: قيمة الفيريتين (${ferritin}) تتجاوز المنطق البشري!</div>`;
-                return;
-            }
-            if (ferritin > 500 && iron < 120) {
-                aiWindow.innerHTML = `<div class="validation-error" style="background:#d35400;">⚠️ تضارب حيوى: لا يمكن للمخزون أن يكون مرتفعاً جداً (${ferritin}) بينما الحديد المتداول طبيعي أو منخفض. قد يشير ذلك لحالة التهابية.</div>`;
-                return;
-            }
+        // 1. التحقق من دقة حساب MCH رياضياً
+        let calculatedMCH = (hb * 10) / rbc;
+        if (Math.abs(mch - calculatedMCH) > 0.8) { 
+            aiWindow.innerHTML = `<div class="validation-error" style="background:#e67e22;">⚠️ خطأ في مطابقة البيانات!<br>بناءً على Hb و RBC، يجب أن تكون قيمة MCH تقريباً: ${calculatedMCH.toFixed(1)} pg.</div>`;
+            return;
         }
 
-        // 3. ثالثاً: حساب الموازين الأربعة
+        // 2. حساب الموازين الأربعة
         let mentzer = (mcv / rbc).toFixed(1);
         let shine = ((Math.pow(mcv, 2) * mch) / 100).toFixed(0);
         let srivastava = (mch / rbc).toFixed(1); 
@@ -433,56 +452,70 @@ async function analyzeAI(){
 
         report += `<div style="text-align:center; margin:10px; font-weight:bold; color:#8e44ad;">🗳️ نتيجة تصويت المؤشرات: ${thalVotes} من أصل 4 تشير للثلاسيميا</div>`;
 
-        // 4. رابعاً: منطق الفرز الأولي وطلب الفيريتين (اختياري/إجباري)
-        // يُطلب الفيريتين إذا كان هناك تصويت، أو إذا كانت القيم حدية (حسب البروتوكول)
+        // 3. [الأولوية الأولى]: طلب الفيريتين لاستبعاد نقص الحديد
         if (isNaN(ferritin)) {
-            if (thalVotes >= 1 || mch < 27 || mcv < 80) {
-                report += `<div class="validation-error" style="background:#f39c12; border-color:#e67e22;">⚠️ خطوة مطلوبة: المؤشرات تكتشف خللاً أو قيماً حدية؛ يرجى إدخال قيمة الفيريتين (Ferritin) لاستبعاد نقص الحديد قبل الحسم.</div>`;
+             if (thalVotes >= 1 || mch < 27 || mcv < 80 || iron < 60) {
+                report += `<div class="validation-error" style="background:#f39c12; border-color:#e67e22;">⚠️ خطوة مطلوبة (المستوى 1): يرجى إدخال قيمة الفيريتين (Ferritin) لاستبعاد نقص الحديد قبل فحص السلاسل الجينية.</div>`;
                 aiWindow.innerHTML = report; return;
-            }
-        }
-
-        // 5. خامساً: معالجة نتيجة الفيريتين وطلب HbA2
-        if (!isNaN(ferritin)) {
-            if (ferritin < 15) {
+             }
+        } else {
+             // إذا وجد الفيريتين وكان منخفضاً، نتوقف هنا
+             if (ferritin < 15) {
                 report += `<div style="background:#fdedec; border:1px solid #e74c3c; padding:10px; border-radius:8px; text-align:center;">📍 <b style="color:#c0392b;">الحكم: أنيميا نقص الحديد (IDA)</b></div>
                 <div class="explanation-box">التفسير: انخفاض المخزون يفسر اضطراب المؤشرات. يجب معالجة نقص الحديد أولاً.</div>`;
                 aiWindow.innerHTML = report; return;
-            } else if (isNaN(hba2)) {
-                 report += `<div class="validation-error" style="background:#e67e22;">⚠️ تم استبعاد نقص الحديد؛ يرجى إدخال قيمة HbA2 للحسم بين (ألفا، بيتا، أو صامتة).</div>`;
-                 aiWindow.innerHTML = report; return;
-            }
+             }
         }
 
-        // 6. سادساً: التحليل النهائي عند توفر HbA2 (الحكم النهائي)
+        // 4. [الأولوية الثانية]: طلب HbA2 للحسم الجيني بعد استقرار مخازن الحديد
+        if (!isNaN(ferritin) && ferritin >= 15 && isNaN(hba2)) {
+             report += `<div class="validation-error" style="background:#e67e22;">⚠️ تم استبعاد نقص الحديد؛ الخطوة التالية هي إدخال قيمة HbA2 للحسم بين أنواع الثلاسيميا.</div>`;
+             aiWindow.innerHTML = report; return;
+        }
+
+        // 5. التحليل النهائي عند توفر HbA2
         if (!isNaN(hba2)) {
             let finalDecision = "";
             let explanation = "";
             let showDNANote = true; 
 
-            if (hba2 > 3.5) {
+            if (hba2 < 2.0) {
+                // التحليل المنطقي للقيمة المنخفضة جداً (أقل من 2)
+                finalDecision = "اشتباه ألفا ثلاسيميا أو أنيميا سيدروبلاستيك";
+                explanation = `قيمة HbA2 منخفضة جداً (${hba2}%). في حال سلامة مخازن الحديد، هذا الانخفاض يوجه بقوة نحو خلل في سلاسل ألفا أو وجود حالات نادرة تؤثر على تصنيع الهيموجلوبين البالغ، مما يتطلب مسحاً جينياً شاملاً.`;
+            } else if (hba2 > 3.5) {
                 finalDecision = "حامل لسمة بيتا ثلاسيميا (β-Thalassemia Trait)";
-                explanation = `بناءً على تصويت المؤشرات (${thalVotes}/4) وارتفاع HbA2؛ التشخيص مؤكد لبيتا ثلاسيميا.`;
-            } else if (hba2 < 2.5 && (thalVotes >= 2 || mcv < 75)) {
-                finalDecision = "اشتباه ثلاسيميا ألفا";
-                explanation = "انخفاض HbA2 مع اضطراب المؤشرات وسلامة الحديد يوجهنا بقوة نحو طفرات سلاسل ألفا.";
-            } else if (hba2 >= 2.5 && hba2 <= 3.2 && (thalVotes >= 1 || (mcv >= 77 && mcv <= 82) || (mch >= 25 && mch <= 27))) {
+                explanation = `بناءً على تصويت المؤشرات (${thalVotes}/4) وارتفاع HbA2؛ التشخيص يتوافق مع البروتوكول الوطني لبيتا ثلاسيميا.`;
+            } else if (hba2 >= 2.5 && hba2 <= 3.2 && (thalVotes >= 1 || (mcv >= 76 && mcv <= 81))) {
                 finalDecision = "اشتباه ثلاسيميا صامتة (Silent Carrier)";
-                explanation = "تم كشف 'الصوت الصامت'؛ المؤشرات رصدت طفرة خفيفة تسببت في قيم حدية رغم سلامة HbA2 والحديد.";
-            } else {
+                explanation = "تم كشف 'الصوت الصامت'؛ المؤشرات رصدت طفرة جينية أثرت على حجم الكريات رغم سلامة الحديد، مع قيمة HbA2 في النطاق الطبيعي.";
+            } else if (thalVotes === 0 && mcv >= 82 && mch >= 28) {
                 finalDecision = "حالة سليمة تماماً";
-                explanation = "جميع القيم ضمن النطاقات الطبيعية (Normal Indices) ولا توجد أي طفرة مكتشفة بالموازين.";
+                explanation = "جميع القيم ضمن النطاقات الطبيعية ولا توجد أي طفرة مكتشفة بالموازين.";
                 showDNANote = false; 
+            } else {
+                finalDecision = "حالة رمادية - تحتاج متابعة";
+                explanation = "القيم قريبة من الطبيعي ولكن يوجد تضارب طفيف، يفضل المتابعة الجينية.";
             }
 
             report += `<div style="background:#f5eef8; border:1px solid #8e44ad; padding:10px; border-radius:8px; text-align:center;">📍 <b style="color:#8e44ad;">الحكم النهائي: ${finalDecision}</b></div>
             <div class="explanation-box"><b>تفسير الذكاء الصناعي:</b> ${explanation}</div>`;
+
+            // إضافة رسالة التوافق الحيوي
+            let bioMsg = "";
+            if (iron >= 90) {
+                bioMsg = "✨ توافق مثالي: وصول الحديد إلى مستوى 90 يعزز جداً من فرضية الثلاسيميا في حال وجود صغر كريات، ويستبعد العامل الغذائي بيقين عالٍ.";
+            } else if (hb >= 12 && iron >= 60 && ferritin >= 30) {
+                bioMsg = "✅ تحليل التوافق: مستويات الحديد والمخزون مثالية وتدعم كفاءة إنتاج الهيموجلوبين.";
+            }
+
+            if (bioMsg !== "") {
+                report += `<div class="biocompatibility-box">${bioMsg}</div>`;
+            }
             
             if(showDNANote) {
-                report += `<div class="dna-recommendation">التوجيه: يُنصح بالفحص الجيني (DNA Testing) للقطع باليقين لهذه الحالة المشتبهة.</div>`;
+                report += `<div class="dna-recommendation">التوجيه: يُنصح بالفحص الجيني (DNA Testing) للقطع باليقين.</div>`;
             }
-        } else if (thalVotes === 0 && hb >= 12 && mch >= 28 && mcv >= 82) {
-             report += `<div style="background:#e8f8f5; padding:10px; border-radius:8px; border:1px solid #27ae60; text-align:center;"><span style="color:#27ae60;">✅ <b>الحكم النهائي: حالة سليمة تماماً</b></span></div>`;
         }
 
         aiWindow.innerHTML = report;
