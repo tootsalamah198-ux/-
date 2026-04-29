@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    
-    <title>Smart Mutation Lab | مختبر الطفرات الذكي</title>
-    <meta name="description" content="نظام الميزان الطبي المتقدم للكشف عن الثلاسيميا الصامتة والحالات السليمة">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Smart Mutation Lab | الميزان الدقيق</title>
 <style>
 /* العنوان العربي المضاف */
 .main-arabic-title {
@@ -73,7 +70,7 @@ h1 {
     justify-content: center;
     gap: 10px;
     margin: 15px auto;
-    box-shadow: 0 0 10px #9b59b6;
+    box-shadow:0 0 10px #9b59b6;
 }
 
 .btn-run:hover {
@@ -203,6 +200,51 @@ th{background:#ecf0f1;}
     color: #2980b9;
     font-style: italic;
 }
+
+/* ستايل الطبقة النهائية لـ RDW */
+.rdw-layer-box {
+    background: #fffbe6;
+    border: 1px dashed #f39c12;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+/* ستايل الطبقة الجديدة لتحليل HbA2 */
+.hba2-analysis-box {
+    background: #e8f8f5;
+    border: 1px solid #1abc9c;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #16a085;
+}
+
+/* تنسيق النتيجة النهائية الحاسمة */
+.final-decision-box {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    border: 3px solid #8e44ad;
+    text-align: center;
+}
+.final-decision-box h2 { color: #f1c40f; margin-top: 0; }
+
+/* ستايل المنطقة الرمادية المحترف الجديد */
+.grey-zone-alert {
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+    color: #e65100;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-weight: bold;
+    text-align: center;
+}
 </style>
 </head>
 <body>
@@ -270,6 +312,7 @@ th{background:#ecf0f1;}
         <div><label>الحديد (Iron):</label><input type="number" id="lab-iron" placeholder="μg/dL" step="0.1"></div>
         <div><label>مخزون الحديد فيريتين (اختياري):</label><input type="number" id="lab-ferritin" placeholder="ng/mL" step="0.1"></div>
         <div><label>HbA2 (اختياري):</label><input type="number" id="lab-hba2" placeholder="%" step="0.1"></div>
+        <div><label>RDW-CV (اختياري):</label><input type="number" id="lab-rdw" placeholder="%" step="0.1"></div>
     </div>
 </div>
 
@@ -358,19 +401,34 @@ function run(){
 }
 
 function aiAnalysisLocal(t,seq,aa,positions){
-    let html="";
+    let html = "";
     const normalAA = Math.floor(dna.length/3);
     const sameProtein = aa.join("-") === originalAA.join("-");
+    const hasMutation = t !== "none"; 
     let severe = (seq.length % 3 !== 0 || aa.length < normalAA);
 
-    let hbVal = (t==="none"||sameProtein) ? "12–16" : (severe ? "6–9" : "9–11");
-    let mcvVal = (t==="none"||sameProtein) ? "80–96" : (severe ? "55–65" : "65–75");
-    let mchVal = (t==="none"||sameProtein) ? "27–33" : (severe ? "16–20" : "20–25");
-    let rbcVal = (t==="none"||sameProtein) ? "4.5–5.5" : (severe ? "3.0–4.0" : "5.5–6.5"); 
-    let hba2Val = (t==="none"||sameProtein) ? "2.0–3.5" : (severe ? "1.5–2.5" : "3.5–6.0");
+    let conclusion = "";
+    let hbVal, rbcVal, mcvVal, mchVal, hba2Val;
     let ironVal = "60–170";
 
-    html += `<b>الاستنتاج المتوقع:</b> ${t==="none"||sameProtein ? "حالة سليمة (بروتين طبيعي)" : (severe ? "β⁰ Thalassemia (Major)" : "β⁺ Thalassemia (Minor/Inter)")}<br>
+    if (!hasMutation) {
+        conclusion = "✅ حالة سليمة (لا توجد طفرات)";
+        hbVal = "12–16"; rbcVal = "4.5–5.5"; mcvVal = "80–96"; mchVal = "27–33"; hba2Val = "2.0–3.5";
+    } else if (sameProtein) {
+        // الحل المضاف: الكشف عن الطفرة الصامتة وظيفياً
+        conclusion = "🔍 طفرة صامتة محتملة (Silent Mutation) - قد تؤثر على كفاءة الإنتاج";
+        hbVal = "11–13"; rbcVal = "5.0–6.0"; mcvVal = "75–85"; mchVal = "25–28"; hba2Val = "3.3–3.7";
+    } else {
+        // الطفرات المسببة لتغير في الأحماض الأمينية
+        conclusion = severe ? "🚨 β⁰ Thalassemia (Major)" : "⚠️ β⁺ Thalassemia (Minor/Inter)";
+        hbVal = severe ? "6–9" : "9–11";
+        rbcVal = severe ? "3.0–4.0" : "5.5–6.5";
+        mcvVal = severe ? "55–65" : "65–75";
+        mchVal = severe ? "16–20" : "20–25";
+        hba2Val = severe ? "1.5–2.5" : "3.5–6.0";
+    }
+
+    html += `<b>الاستنتاج المتوقع:</b> ${conclusion}<br>
     <div class="table-container">
     <table>
     <tr><th>الفحص</th><th>القيم الطبيعية</th><th>النتائج المتوقعة</th></tr>
@@ -398,6 +456,9 @@ async function analyzeAI(){
         let hba2 = parseFloat(document.getElementById("lab-hba2").value);
         let iron = parseFloat(document.getElementById("lab-iron").value);
         let ferritin = parseFloat(document.getElementById("lab-ferritin").value);
+        let rdw = parseFloat(document.getElementById("lab-rdw").value);
+
+        var rdwStatus = "";
 
         if(isNaN(hb) || isNaN(mcv) || isNaN(mch) || isNaN(iron) || isNaN(rbc)){
              aiWindow.innerHTML = "⚠️ خطأ: يرجى إدخال القيم الأساسية (Hb, RBC, MCV, MCH, Iron) للتحليل.";
@@ -405,7 +466,7 @@ async function analyzeAI(){
         }
 
         // ==========================================
-        // صمامات أمان الحدود المنطقية (المستوى الأول)
+        // صمامات أمان الحدود المنطقية - التعديل الصارم
         // ==========================================
         if (hb < 2 || hb > 22) {
             aiWindow.innerHTML = `<div class="validation-error">⚠️ القيمة المدخلة للهيموجلوبين (${hb}) غير منطقية طبياً.</div>`;
@@ -419,8 +480,8 @@ async function analyzeAI(){
             aiWindow.innerHTML = `<div class="validation-error">⚠️ قيمة MCV (${mcv}) غير ممكنة حيوياً.</div>`;
             return;
         }
-        if (iron < 5 || iron > 500) {
-            aiWindow.innerHTML = `<div class="validation-error">⚠️ قيمة الحديد (${iron}) خارج المدى المخبري المنطقي.</div>`;
+        if (iron < 5 || iron > 1000) {
+            aiWindow.innerHTML = `<div class="validation-error">⚠️ قيمة الحديد (${iron}) غير منطقية حيوياً.</div>`;
             return;
         }
 
@@ -452,76 +513,74 @@ async function analyzeAI(){
             <tr><td>Srivastava</td><td>Thal < 3.8 < IDA</td><td>${srivastava}</td><td><span class="index-tag ${srivastava<3.8?'tag-thal':'tag-ida'}">${srivastava<3.8?'سمة ثلاسيميا':'نقص حديد'}</span></td></tr>
             <tr><td>England & Fraser</td><td>Thal < 0 < N</td><td>${england}</td><td><span class="index-tag ${england<0?'tag-thal':'tag-ida'}">${england<0?'سمة ثلاسيميا':'طبيعي/نقص حديد'}</span></td></tr>
         </table>`;
-
         report += `<div style="text-align:center; margin:10px; font-weight:bold; color:#8e44ad;">🗳️ نتيجة تصويت المؤشرات: ${thalVotes} من أصل 4 تشير للثلاسيميا</div>`;
 
-        // 3. [الأولوية الأولى]: طلب الفيريتين لاستبعاد نقص الحديد
+        // صمام الفيريتين
         if (isNaN(ferritin)) {
-             if (thalVotes >= 1 || mch < 27 || mcv < 80 || iron < 60) {
-                report += `<div class="validation-error" style="background:#f39c12; border-color:#e67e22;">⚠️ خطوة مطلوبة (المستوى 1): يرجى إدخال قيمة الفيريتين (Ferritin) لاستبعاد نقص الحديد قبل فحص السلاسل الجينية.</div>`;
-                aiWindow.innerHTML = report; return;
-             }
-        } else {
-             // إذا وجد الفيريتين وكان منخفضاً، نتوقف هنا
-             if (ferritin < 15) {
-                report += `<div style="background:#fdedec; border:1px solid #e74c3c; padding:10px; border-radius:8px; text-align:center;">📍 <b style="color:#c0392b;">الحكم: أنيميا نقص الحديد (IDA)</b></div>
-                <div class="explanation-box">التفسير: انخفاض المخزون يفسر اضطراب المؤشرات. يجب معالجة نقص الحديد أولاً.</div>`;
-                aiWindow.innerHTML = report; return;
-             }
+             report += `<div class="validation-error" style="background:#3498db; border-color:#2980b9;">🔍 يرجى إدخال قيمة الفيريتين (Ferritin) للمتابعة...</div>`;
+             aiWindow.innerHTML = report;
+             return; 
         }
 
-        // 4. [الأولوية الثانية]: طلب HbA2 للحسم الجيني بعد استقرار مخازن الحديد
-        if (!isNaN(ferritin) && ferritin >= 15 && isNaN(hba2)) {
-             report += `<div class="validation-error" style="background:#e67e22;">⚠️ تم استبعاد نقص الحديد؛ الخطوة التالية هي إدخال قيمة HbA2 للحسم بين أنواع الثلاسيميا.</div>`;
-             aiWindow.innerHTML = report; return;
+        // تحليل التوافق
+        let ironStatusMsg = (ferritin < 20) ? "📉 نقص حديد حاد." : (ferritin >= 30 && iron >= 60 ? "✅ توافق غذائي مثالي." : "⚠️ تضارب جزئي.");
+        report += `<div class="biocompatibility-box">🧬 <b>تحليل توافق المخزون:</b> ${ironStatusMsg}</div>`;
+
+        // صمام RDW
+        if (isNaN(rdw)) {
+             report += `<div class="validation-error" style="background:#f39c12; border-color:#e67e22;">📊 يرجى إدخال قيمة RDW-CV للمتابعة...</div>`;
+             aiWindow.innerHTML = report;
+             return; 
+        }
+        rdwStatus = (rdw >= 11.5 && rdw <= 14.5) ? "طبيعي" : (rdw > 14.5 ? "مرتفع" : "منخفض");
+        report += `<div class="rdw-layer-box">📊 <b>تحليل طبقة RDW:</b> القيمة (${rdw}%) وهي <b>${rdwStatus}</b>.</div>`;
+
+        // صمام HbA2
+        if (isNaN(hba2)) {
+             report += `<div class="validation-error" style="background:#e74c3c; border-color:#c0392b;">⚠️ المرحلة النهائية: يرجى إدخال قيمة HbA2 للمتابعة...</div>`;
+             aiWindow.innerHTML = report; 
+             return; 
         }
 
-        // 5. التحليل النهائي عند توفر HbA2
-        if (!isNaN(hba2)) {
-            let finalDecision = "";
-            let explanation = "";
-            let showDNANote = true; 
+        // --- الثغرة 3: المنطقة الرمادية (Grey Zone) ---
+        if (hba2 >= 3.3 && hba2 <= 3.7) {
+            report += `<div class="grey-zone-alert">⚠️ المنطقة الرمادية لـ HbA2: القيمة (${hba2}%) حرجة، قد تكون طفرة صامتة أو متأثرة بنقص الحديد.</div>`;
+        }
 
-            if (hba2 < 2.0) {
-                // التحليل المنطقي للقيمة المنخفضة جداً (أقل من 2)
-                finalDecision = "اشتباه ألفا ثلاسيميا أو أنيميا سيدروبلاستيك";
-                explanation = `قيمة HbA2 منخفضة جداً (${hba2}%). في حال سلامة مخازن الحديد، هذا الانخفاض يوجه بقوة نحو خلل في سلاسل ألفا أو وجود حالات نادرة تؤثر على تصنيع الهيموجلوبين البالغ، مما يتطلب مسحاً جينياً شاملاً.`;
-            } else if (hba2 > 3.5) {
-                finalDecision = "حامل لسمة بيتا ثلاسيميا (β-Thalassemia Trait)";
-                explanation = `بناءً على تصويت المؤشرات (${thalVotes}/4) وارتفاع HbA2؛ التشخيص يتوافق مع البروتوكول الوطني لبيتا ثلاسيميا.`;
-            } else if (hba2 >= 2.5 && hba2 <= 3.2 && (thalVotes >= 1 || (mcv >= 76 && mcv <= 81))) {
-                finalDecision = "اشتباه ثلاسيميا صامتة (Silent Carrier)";
-                explanation = "تم كشف 'الصوت الصامت'؛ المؤشرات رصدت طفرة جينية أثرت على حجم الكريات رغم سلامة الحديد، مع قيمة HbA2 في النطاق الطبيعي.";
-            } else if (thalVotes === 0 && mcv >= 82 && mch >= 28) {
-                finalDecision = "حالة سليمة تماماً";
-                explanation = "جميع القيم ضمن النطاقات الطبيعية ولا توجد أي طفرة مكتشفة بالموازين.";
-                showDNANote = false; 
+        // --- الثغرة 1: فخ الحديد (The Iron Trap) ---
+        if (ferritin < 20 && hba2 <= 3.5 && thalVotes >= 2) {
+            report += `<div class="validation-error" style="background:#c62828;">🚨 تضارب "فخ الحديد": نقص الحديد الشديد قد يضلل فحص HbA2 ويخفي الثلاسيميا. يوصى بالعلاج ثم الإعادة.</div>`;
+        }
+
+        // التفسير النهائي والربط المنطقي الصارم
+        let finalDecision = "";
+        let finalColor = "#2c3e50";
+
+        if (hba2 > 3.5) {
+            finalDecision = "🚨 سمة بيتا ثلاسيميا مؤكدة (Beta Thalassemia Trait).";
+            finalColor = "#c0392b";
+        } else if (hba2 >= 2.0 && hba2 <= 3.5) {
+            if (thalVotes >= 2 && rdwStatus === "طبيعي" && iron >= 60 && ferritin >= 30) {
+                finalDecision = "🔍 حامل صامت محتمل (Silent Carrier) أو ألفا ثلاسيميا.";
+            } else if (ferritin < 20 && rdwStatus === "مرتفع") {
+                finalDecision = "📉 نقص حديد (IDA) قد يخفي سمة الثلاسيميا.";
+            } else if (thalVotes === 0 && rdwStatus === "طبيعي" && hb >= 12) {
+                finalDecision = "✅ حالة سليمة تماماً (Normal).";
             } else {
-                finalDecision = "حالة رمادية - تحتاج متابعة";
-                explanation = "القيم قريبة من الطبيعي ولكن يوجد تضارب طفيف، يفضل المتابعة الجينية.";
+                finalDecision = "🧬 حالة غير حاسمة: يرجى إجراء فحص DNA للتأكد.";
             }
-
-            report += `<div style="background:#f5eef8; border:1px solid #8e44ad; padding:10px; border-radius:8px; text-align:center;">📍 <b style="color:#8e44ad;">الحكم النهائي: ${finalDecision}</b></div>
-            <div class="explanation-box"><b>تفسير الذكاء الصناعي:</b> ${explanation}</div>`;
-
-            // إضافة رسالة التوافق الحيوي
-            let bioMsg = "";
-            if (iron >= 90) {
-                bioMsg = "✨ توافق مثالي: وصول الحديد إلى مستوى 90 يعزز جداً من فرضية الثلاسيميا في حال وجود صغر كريات، ويستبعد العامل الغذائي بيقين عالٍ.";
-            } else if (hb >= 12 && iron >= 60 && ferritin >= 30) {
-                bioMsg = "✅ تحليل التوافق: مستويات الحديد والمخزون مثالية وتدعم كفاءة إنتاج الهيموجلوبين.";
-            }
-
-            if (bioMsg !== "") {
-                report += `<div class="biocompatibility-box">${bioMsg}</div>`;
-            }
-            
-            if(showDNANote) {
-                report += `<div class="dna-recommendation">التوجيه: يُنصح بالفحص الجيني (DNA Testing) للقطع باليقين.</div>`;
-            }
+        } else {
+            finalDecision = "📉 انخفاض HbA2: قد يشير لنقص حديد شديد أو ألفا ثلاسيميا.";
         }
+
+        report += `<div class="final-decision-box" style="border-color:${finalColor}">
+            <h2>النتيجة النهائية للميزان</h2>
+            <p>${finalDecision}</p>
+            <small>بناءً على الربط المنطقي بين 8 متغيرات حيوية وصمامات الأمان الثلاثة.</small>
+        </div>`;
 
         aiWindow.innerHTML = report;
+
     }, 1500);
 }
 </script>
