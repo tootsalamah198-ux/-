@@ -485,6 +485,18 @@ async function analyzeAI(){
             return;
         }
 
+        // --- صمام أمان مخزون الحديد (Ferritin) الجديد ---
+        if (!isNaN(ferritin) && (ferritin < 1 || ferritin > 10000)) {
+            aiWindow.innerHTML = `<div class="validation-error">⚠️ قيمة Ferritin (${ferritin}) خارج النطاق السريري الممكن.</div>`;
+            return;
+        }
+
+        // --- بوابة فحص RDW المنطقية الحصرية ---
+        if (!isNaN(rdw) && (rdw < 8 || rdw > 40)) {
+            aiWindow.innerHTML = `<div class="validation-error" style="background: #e74c3c; color: white;">⚠️ قيمة RDW-CV غير منطقية (${rdw}%).<br>المجال البشري الممكن يتراوح عادة بين 8% و 40%.</div>`;
+            return;
+        }
+
         // 1. التحقق من دقة حساب MCH رياضياً
         let calculatedMCH = (hb * 10) / rbc;
         if (Math.abs(mch - calculatedMCH) > 0.8) { 
